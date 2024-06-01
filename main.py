@@ -1,25 +1,22 @@
 from flask import Flask, request, send_file
 from flask_cors import CORS
-from backgroundremover.bg import remove
 import io
 import zipfile
+from PIL import Image
+import rembg
 
 app = Flask(__name__)
-
-CORS(app) 
+CORS(app)
 
 def remove_bg(data):
-    model_choices = ["u2net", "u2net_human_seg", "u2netp"]
-    img = remove(data, model_name=model_choices[0],
-                 alpha_matting=True,
-                 alpha_matting_foreground_threshold=240,
-                 alpha_matting_background_threshold=10,
-                 alpha_matting_erode_structure_size=10,
-                 alpha_matting_base_size=1000)
-    return img
+    input_image = Image.open(io.BytesIO(data))
+    output_image = rembg.remove(input_image)
+    output_buffer = io.BytesIO()
+    output_image.save(output_buffer, format='PNG')
+    return output_buffer.getvalue()
 
 @app.route('/remove-bg', methods=['POST'])
-def remove_bg_endpoint():
+def remove_bg_endpoint(): 
     if 'files' not in request.files:
         return 'No files part', 400
     files = request.files.getlist('files')
@@ -44,4 +41,3 @@ def remove_bg_endpoint():
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)
- 
