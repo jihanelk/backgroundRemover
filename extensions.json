@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "esbenp.prettier-vscode", // prettier extension
+        "ms-azuretools.vscode-docker", // docker extension
+        "ms-python.vscode-pylance", // pylance extension
+        "ms-python.python" // python extension
+    ]
+}
