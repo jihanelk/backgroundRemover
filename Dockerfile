@@ -1,6 +1,6 @@
 FROM python:3.9 
 
-ADD main.py .
+ADD app.py .
 
 WORKDIR /usr/app/src
 
@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 5000
 
 # run the app
-CMD ["python", "main.py"]
+CMD ["python", "app.py"]

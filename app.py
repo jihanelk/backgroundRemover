@@ -17,24 +17,28 @@ def remove_bg(data):
 
 @app.route('/remove-bg', methods=['POST'])
 def remove_bg_endpoint(): 
-    if 'files' not in request.files:
-        return 'No files part', 400
+    if 'files' not in request.files or 'ids' not in request.form:
+        return 'No files or IDs part', 400
     files = request.files.getlist('files')
-    if not files:
-        return 'No selected files', 400
+    ids = request.form.getlist('ids')
+    if not files or not ids or len(files) != len(ids):
+        return 'Files and IDs count mismatch', 400
+
+    print("Files received:", [file.filename for file in files])
+    print("IDs received:", ids)
 
     processed_images = []
 
-    for file in files:
+    for file, id in zip(files, ids):
         data = file.read()
         img = remove_bg(data)
-        processed_images.append(img)
+        processed_images.append((id, img))
 
     # Create a zip file in memory
     memory_file = io.BytesIO()
     with zipfile.ZipFile(memory_file, 'w') as zf:
-        for i, img in enumerate(processed_images):
-            zf.writestr(f'image_{i}.png', img)
+        for id, img in processed_images:
+            zf.writestr(f'{id}.png', img)
     memory_file.seek(0)
 
     return send_file(memory_file, mimetype='application/zip', as_attachment=True, attachment_filename='processed_images.zip')
